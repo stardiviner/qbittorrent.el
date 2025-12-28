@@ -4,6 +4,7 @@
 ;;
 ;; Author: Merrick Luo <merrick@luois.me>
 ;; Maintainer: Merrick Luo <merrick@luois.me>
+;; Contributors: stardiviner <numbchild@gmail.com>
 ;; Created: October 07, 2022
 ;; Modified: October 07, 2022
 ;; Version: 0.0.1
