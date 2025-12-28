@@ -81,12 +81,12 @@
 
 (transient-define-prefix qbittorrent-dispatch-add ()
   "Add new torrent menu for the qbittorrent-mode"
-  [("f" "Add new torrent with file" qbittorrent-add)
-   ("m" "Add new torrent with magnet" qbittorrent-add-magnet)])
+  [("f" "Add new torrent with file" qbittorrent-add-torrent-file)
+   ("m" "Add new torrent with magnet" qbittorrent-add-magnet-link)])
 
 ;;;; Functions
 
-(defun qbittorrent-add (&optional torrent)
+(defun qbittorrent-add-torrent-file (&optional torrent)
   "Add TORRENT file."
   (interactive)
   (let ((input (read-file-name "Select torrent file: ")))
@@ -94,7 +94,7 @@
       ;; FIXME: do post api implementation
       (message "uploading"))))
 
-(defun qbittorrent-add-magnet (&optional link)
+(defun qbittorrent-add-magnet-link (&optional link)
   "Add new magnet LINK."
   (interactive)
   (let ((input (read-string "Magnet Link: ")))
