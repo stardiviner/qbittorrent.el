@@ -73,12 +73,12 @@
 
 ;;;; Transient menu
 
-(transient-define-prefix qbittorrent-dispatch
+(transient-define-prefix qbittorrent-dispatch ()
   "Transient menu for the qbittorrent-mode"
   ["Actions"
    ("a" "Add" qbittorrent-dispatch-add)])
 
-(transient-define-prefix qbittorrent-dispatch-add
+(transient-define-prefix qbittorrent-dispatch-add ()
   "Add new torrent menu for the qbittorrent-mode"
   [("f" "Add new torrent with file" qbittorrent-add)
    ("m" "Add new torrent with magnet" qbittorrent-add-magnet)])
