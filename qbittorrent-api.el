@@ -24,6 +24,8 @@
 (cl-defstruct qbittorrent-api-session
   baseurl cookie)
 
+;;; `plz' :else handler function
+
 (defun qbittorrent-api--signal-error (plz-err)
   "Signal an error for PLZ-ERR.
 Borrowed from https://github.com/alphapapa/ement.el"
@@ -46,6 +48,8 @@ Borrowed from https://github.com/alphapapa/ement.el"
 
     (signal 'qbittorrent-api-error (list error-message))))
 
+;;; login to get session cookie
+
 (defun qbittorrent-api-login (session &optional username password)
   "Login to a qBittorrent instance at SESSION.
 USERNAME and PASSWORD can be null if in trusted LAN"
@@ -62,6 +66,8 @@ USERNAME and PASSWORD can be null if in trusted LAN"
             (setf (qbittorrent-api-session-cookie session) (car (string-split set-cookie ";")))
           (error "Login failed, check your username and password"))))
     session))
+
+;;; wrapper for calling API
 
 (cl-defun qbittorrent-api (session path &key (method 'get) (then 'sync))
   "Call api at PATH in SESSION."
