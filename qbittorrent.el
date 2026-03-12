@@ -126,18 +126,6 @@
            (make-qbittorrent-api-session :baseurl qbittorrent-baseurl)
            qbittorrent-username qbittorrent-password))))
 
-(defun qbittorrent--string-pad-to-width (str width)
-  "将字符串 STR 填充空格，使其显示宽度达到 WIDTH。
-如果 STR 的显示宽度已经超过 WIDTH，则截断（可选逻辑，此处仅做填充）。"
-  (let ((current-width (string-width str)))
-    (if (>= current-width width)
-        ;; 如果已经足够宽，可以选择截断或直接返回
-        ;; 这里简单返回原字符串，或者你可以使用 (substring str 0 ...) 配合宽度计算截断
-        str
-      ;; 计算需要填充的空格数
-      (let ((padding (- width current-width)))
-        (concat str (make-string padding ? ))))))
-
 (defun qbittorrent--draw-torrents (torrents)
   "Parse the TORRENTS and update tabulated list."
   (when-let ((buffer (get-buffer qbittorrent-buffer)))
@@ -150,7 +138,6 @@
                             (list (alist-get 'name torrent)
                                   (vector
                                    ;; Name
-                                   ;; (qbittorrent--string-pad-to-width (alist-get 'name torrent) 60)
                                    (propertize (string-limit (alist-get 'name torrent) 60)
                                                'face '(:foreground "MediumPurple3"))
                                    ;; Size
