@@ -126,25 +126,58 @@
            (make-qbittorrent-api-session :baseurl qbittorrent-baseurl)
            qbittorrent-username qbittorrent-password))))
 
+(defun qbittorrent--string-pad-to-width (str width)
+  "将字符串 STR 填充空格，使其显示宽度达到 WIDTH。
+如果 STR 的显示宽度已经超过 WIDTH，则截断（可选逻辑，此处仅做填充）。"
+  (let ((current-width (string-width str)))
+    (if (>= current-width width)
+        ;; 如果已经足够宽，可以选择截断或直接返回
+        ;; 这里简单返回原字符串，或者你可以使用 (substring str 0 ...) 配合宽度计算截断
+        str
+      ;; 计算需要填充的空格数
+      (let ((padding (- width current-width)))
+        (concat str (make-string padding ? ))))))
+
 (defun qbittorrent--draw-torrents (torrents)
   "Parse the TORRENTS and update tabulated list."
   (when-let ((buffer (get-buffer qbittorrent-buffer)))
     (with-current-buffer buffer
-      (setq tabulated-list-entries
-            (cl-map 'list
-                    (lambda (torrent)
-                      (list (alist-get 'name torrent)
-                            (vector
-                             (qbittorrent--torrent-eta torrent)
-                             (file-size-human-readable (alist-get 'size torrent))
-                             (format "%d%%" (* (alist-get 'progress torrent) 100))
-                             (format "%s/s" (file-size-human-readable (alist-get 'dlspeed torrent) nil "" "B"))
-                             (format "%s/s" (file-size-human-readable (alist-get 'upspeed torrent) nil "" "B"))
-                             (format "%.2f" (alist-get 'ratio torrent))
-                             (qbittorrent--torrent-status torrent)
-                             (format-time-string "%Y-%m-%d %H:%M:%S%p" (alist-get 'added_on torrent))
-                             (alist-get 'name torrent))))
-                    torrents))
+      ;; (setq-local tabulated-list-format nil)
+      (setq-local tabulated-list-use-header-line t)
+      (setq-local tabulated-list-entries
+                  (cl-map 'list
+                          (lambda (torrent)
+                            (list (alist-get 'name torrent)
+                                  (vector
+                                   ;; Name
+                                   ;; (qbittorrent--string-pad-to-width (alist-get 'name torrent) 60)
+                                   (propertize (string-limit (alist-get 'name torrent) 60)
+                                               'face '(:foreground "MediumPurple3"))
+                                   ;; Size
+                                   (propertize (file-size-human-readable (alist-get 'size torrent))
+                                               'face '(:foreground "MediumPurple4"))
+                                   ;; Done
+                                   (propertize (format "%d%%" (* (alist-get 'progress torrent) 100))
+                                               'face '(:foreground "yellow3"))
+                                   ;; ETA
+                                   (propertize (qbittorrent--torrent-eta torrent)
+                                               'face '(:foreground "dark gray"))
+                                   ;; Download
+                                   (propertize (format "%s/s" (file-size-human-readable (alist-get 'dlspeed torrent) nil "" "B"))
+                                               'face '(:foreground "dark red"))
+                                   ;; Upload
+                                   (propertize (format "%s/s" (file-size-human-readable (alist-get 'upspeed torrent) nil "" "B"))
+                                               'face '(:foreground "dark green"))
+                                   ;; Ratio
+                                   (propertize (format "%.2f" (alist-get 'ratio torrent))
+                                               'face '(:foreground "purple3"))
+                                   ;; Status
+                                   (propertize (qbittorrent--torrent-status torrent)
+                                               'face '(:foreground "dark orange"))
+                                   ;; Added on
+                                   (propertize (format-time-string "%Y-%m-%d %H:%M:%S%p" (alist-get 'added_on torrent))
+                                               'face '(:foreground "dark gray")))))
+                          torrents))
       (revert-buffer))))
 
 (defun qbittorrent--refresh-torrents ()
@@ -166,16 +199,16 @@
   "Major mode for list of torrents in a qBittorrent server."
   :group 'qbittorrent
   (setq-local line-move-visual nil)
-  (setq tabulated-list-format
-        [("ETA" 8 >= :left-align t)
-         ("Size" 8 >= :right-align t)
-         ("Done" 8 >= :right-align t)
-         ("Download" 9 nil :right-align t)
-         ("Upload" 9 nil :right-align t)
-         ("Ratio" 5 >= :right-align t)
-         ("Status" 12 t)
-         ("Added on" 22 t :left-align t)
-         ("Name" 0 t :left-align t)])
+  (setq-local tabulated-list-format
+              [("Name" 60 t :left-align t)
+               ("Size" 8 >= :right-align t)
+               ("Done" 8 >= :right-align t)
+               ("ETA" 8 >= :right-align t)
+               ("Download" 9 nil :right-align t)
+               ("Upload" 9 nil :right-align t)
+               ("Ratio" 5 >= :right-align t)
+               ("Status" 12 t)
+               ("Added on" 22 t :left-align t)])
   (setq tabulated-list-padding 1)
   (setq tabulated-list-revert-hook #'qbittorrent--refresh-torrents)
   (tabulated-list-init-header))
