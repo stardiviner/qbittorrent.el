@@ -139,19 +139,19 @@
                                   (vector
                                    ;; Name
                                    (propertize (string-limit (alist-get 'name torrent) 60)
-                                               'face '(:foreground "MediumPurple3"))
+                                               'face '(:foreground "SteelBlue1"))
                                    ;; Size
                                    (propertize (file-size-human-readable (alist-get 'size torrent))
                                                'face '(:foreground "MediumPurple4"))
                                    ;; Done
                                    (propertize (format "%d%%" (* (alist-get 'progress torrent) 100))
-                                               'face '(:foreground "yellow3"))
+                                               'face '(:foreground "yellow4"))
                                    ;; ETA
                                    (propertize (qbittorrent--torrent-eta torrent)
                                                'face '(:foreground "dark gray"))
                                    ;; Download
                                    (propertize (format "%s/s" (file-size-human-readable (alist-get 'dlspeed torrent) nil "" "B"))
-                                               'face '(:foreground "dark red"))
+                                               'face `(:foreground ,(if (> (alist-get 'dlspeed torrent) 200) "VioletRed1" "dark red")))
                                    ;; Upload
                                    (propertize (format "%s/s" (file-size-human-readable (alist-get 'upspeed torrent) nil "" "B"))
                                                'face '(:foreground "dark green"))
@@ -160,7 +160,7 @@
                                                'face '(:foreground "purple3"))
                                    ;; Status
                                    (propertize (qbittorrent--torrent-status torrent)
-                                               'face '(:foreground "dark orange"))
+                                               'face '(:foreground "dark cyan"))
                                    ;; Added on
                                    (propertize (format-time-string "%Y-%m-%d %H:%M:%S%p" (alist-get 'added_on torrent))
                                                'face '(:foreground "dark gray")))))
