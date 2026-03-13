@@ -73,17 +73,24 @@ USERNAME and PASSWORD can be null if in trusted LAN"
   "Call qBittorrent API at PATH using SESSION.
 Supports :method, :params, :then, :else, and passes other keys to plz."
   (let* ((method (or method 'get))
-         (url (concat (qbittorrent-api-session-baseurl session) path))
-         (headers `(("Cookie" . ,(qbittorrent-api-session-cookie session))))
-         (request-args (list method url :headers headers :as 'json-read)))
-    (when params
-      (if (eq method 'get)
-          (setq url (concat url "?" (url-build-query-string params)))
-        (setq request-args (append request-args
-                                   (list :body (url-build-query-string (if (and params (consp params) (not (listp (car params))))
-                                                                           (list params)
-                                                                         params)))
-                                   (list :headers (append headers '(("Content-Type" . "application/x-www-form-urlencoded"))))))))
+         (base-url (concat (qbittorrent-api-session-baseurl session) path))
+         (base-headers `(("Cookie" . ,(qbittorrent-api-session-cookie session))))
+         (query-list
+          (when params
+            (cond
+             ((and (consp params) (consp (car params))) params)
+             ((and (consp params) (not (consp (car params)))) (list params))
+             (t nil))))
+         (built-url (if (and query-list (eq method 'get))
+                        (concat base-url "?" (url-build-query-string query-list))
+                      base-url))
+         (body (when (and query-list (not (eq method 'get)))
+                 (url-build-query-string query-list)))
+         (final-headers (if body
+                            (append base-headers '(("Content-Type" . "application/x-www-form-urlencoded")))
+                          base-headers))
+         (request-args (append (list method built-url :headers final-headers :as 'json-read)
+                               (when body (list :body body)))))
     (when then (setq request-args (append request-args (list :then then))))
     (when else (setq request-args (append request-args (list :else else))))
     (apply #'plz request-args)))
