@@ -91,7 +91,8 @@
     ("D" "Delete" qbittorrent-torrent-delete)]
    ["Priority"
     ("i" "Increase priority" qbittorrent-torrent-increase-priority)
-    ("d" "Decrease priority" qbittorrent-torrent-decrease-priority)]]
+    ("d" "Decrease priority" qbittorrent-torrent-decrease-priority)
+    ("m" "Maximal  priority" qbittorrent-torrent-maximal-priority)]]
   ["Transfer"
    ("I" "Info" qbittorrent-transfer-info)
    ("S" "Speed limits mode" qbittorrent-transfer-speed-limits-mode)]
@@ -231,6 +232,18 @@
                      :params `(("hashes" ,torrent-hash))
                      :as 'string ; response body
                      :then (lambda (response) (message "Decreased torrent priority for %s" torrent-hash)))))
+
+(defun qbittorrent-torrent-maximal-priority (&optional torrent-hash)
+  "Maximal torrent priority."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/topPrio"))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash))
+                     :as 'string ; response body
+                     :then (lambda (response) (message "Maximal torrent priority for %s" torrent-hash)))))
 
 ;;;;;; Transfer
 
