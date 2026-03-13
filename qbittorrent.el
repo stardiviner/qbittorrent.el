@@ -118,9 +118,10 @@
   (interactive)
   (let* ((session (qbittorrent--ensure-api-session))
          (path "/api/v2/torrents/info"))
-    (qbittorrent-api
-     session path
-     :then (lambda (valist) (message "Torrent list:\n%S" (string-join (mapcar (lambda (alist) (cdr (assoc 'name alist))) valist) "\n"))))))
+    (qbittorrent-api session path
+                     :then (lambda (valist)
+                             (message "Torrent list:\n%S"
+                                      (string-join (mapcar (lambda (alist) (cdr (assoc 'name alist))) valist) "\n"))))))
 
 (defun qbittorrent-torrent-properties (&optional torrent-hash)
   "Show torrent properties."
@@ -128,9 +129,8 @@
   (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/properties?hash=%s" torrent-hash)))
-    (qbittorrent-api
-     session path
-     :then (lambda (alist) (message "Torrent properties: %s" alist)))))
+    (qbittorrent-api session path
+                     :then (lambda (alist) (message "Torrent properties: %s" alist)))))
 
 (defun qbittorrent-torrent-trackers (&optional torrent-hash)
   "Show torrent trackers."
@@ -138,9 +138,8 @@
   (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/trackers?hash=%s" torrent-hash)))
-    (qbittorrent-api
-     session path
-     :then (lambda (alist) (message "Torrent trackers: %s" alist)))))
+    (qbittorrent-api session path
+                     :then (lambda (alist) (message "Torrent trackers: %s" alist)))))
 
 (defun qbittorrent-torrent-webseeds (&optional torrent-hash)
   "Show torrent webseeds."
@@ -148,9 +147,8 @@
   (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/webseeds?hash=%s" torrent-hash)))
-    (qbittorrent-api
-     session path
-     :then (lambda (alist) (message "Torrent webseeds: %s" alist)))))
+    (qbittorrent-api session path
+                     :then (lambda (alist) (message "Torrent webseeds: %s" alist)))))
 
 (defun qbittorrent-torrent-files (&optional torrent-hash)
   "Show torrent content files."
@@ -158,9 +156,8 @@
   (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/files?hash=%s" torrent-hash)))
-    (qbittorrent-api
-     session path
-     :then (lambda (alist) (message "Torrent content files: %s" alist)))))
+    (qbittorrent-api session path
+                     :then (lambda (alist) (message "Torrent content files: %s" alist)))))
 
 (defun qbittorrent-torrent-increase-priority (&optional torrent-hash)
   "Increase torrent priority."
@@ -188,18 +185,18 @@
   (interactive)
   (let* ((session (qbittorrent--ensure-api-session))
          (path "/api/v2/transfer/info"))
-    (qbittorrent-api
-     session path
-     :then (lambda (valist) (message "Transfer info: %S" valist)))))
+    (qbittorrent-api session path
+                     :then (lambda (valist) (message "Transfer info: %S" valist)))))
 
 (defun qbittorrent-transfer-speed-limits-mode ()
   "Toggle speed limits mode."
   (interactive)
   (let* ((session (qbittorrent--ensure-api-session))
          (path "/api/v2/transfer/toggleSpeedLimitsMode")) ; WARNING: method "toggleSpeedLimitsMode" not allowed.
-    (qbittorrent-api
-     session path
-     :then (lambda (valist) (message "Speed Limits Mode %s" (if (qbittorrent-transfer-get-speed-limits-mode) "enabled" "disabled"))))))
+    (qbittorrent-api session path
+                     :then (lambda (valist)
+                             (message "Speed Limits Mode %s"
+                                      (if (qbittorrent-transfer-get-speed-limits-mode) "enabled" "disabled"))))))
 
 ;;;;;; Logs
 
