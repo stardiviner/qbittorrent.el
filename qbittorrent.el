@@ -575,6 +575,7 @@
      ((string-prefix-p "meta" state) "metadata")
      ((string-prefix-p "allocating" state) "allocating")
      ((string-prefix-p "paused" state) "paused")
+     ((string-prefix-p "stopped" state) "stopped")
      ((string-prefix-p "queued" state) "queued")
      ((string-prefix-p "stalled" state) "stalled")
      ((string-prefix-p "seeding\\|upload" state) "seeding")
