@@ -121,14 +121,10 @@
      session path
      :then (lambda (valist) (message "Torrent list:\n%S" (string-join (mapcar (lambda (alist) (cdr (assoc 'name alist))) valist) "\n"))))))
 
-(defun qbittorrent--get-torrent-hash-at-point ()
-  "Get the hash of torrent at point in `tabulated-list-mode' of buffer \"*qBittorrent*\"."
-  (tabulated-list-get-id))
-
 (defun qbittorrent-torrent-properties (&optional torrent-hash)
   "Show torrent properties."
   (interactive)
-  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+  (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/properties?hash=%s" torrent-hash)))
     (qbittorrent-api
@@ -138,7 +134,7 @@
 (defun qbittorrent-torrent-trackers (&optional torrent-hash)
   "Show torrent trackers."
   (interactive)
-  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+  (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/trackers?hash=%s" torrent-hash)))
     (qbittorrent-api
@@ -148,7 +144,7 @@
 (defun qbittorrent-torrent-webseeds (&optional torrent-hash)
   "Show torrent webseeds."
   (interactive)
-  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+  (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/webseeds?hash=%s" torrent-hash)))
     (qbittorrent-api
@@ -158,7 +154,7 @@
 (defun qbittorrent-torrent-files (&optional torrent-hash)
   "Show torrent content files."
   (interactive)
-  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+  (let* ((torrent-hash (tabulated-list-get-id))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/files?hash=%s" torrent-hash)))
     (qbittorrent-api
@@ -251,7 +247,7 @@
       (setq-local tabulated-list-entries
                   (cl-map 'list
                           (lambda (torrent)
-                            (list (alist-get 'hash torrent) ; for `tabulated-list-get-id' in `qbittorrent--get-torrent-hash-at-point'
+                            (list (alist-get 'hash torrent) ; for `tabulated-list-get-id'
                                   (vector
                                    ;; Name
                                    (propertize (string-limit (alist-get 'name torrent) 60)
