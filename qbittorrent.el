@@ -84,6 +84,8 @@
    ("T" "Trackers" qbittorrent-torrent-trackers)
    ("W" "Webseed" qbittorrent-torrent-webseeds)
    ("F" "Files" qbittorrent-torrent-files)
+   ("p" "Puase" qbittorrent-torrent-pause)
+   ("r" "Resume" qbittorrent-torrent-resume)
    ("I" "Increase priority" qbittorrent-torrent-increase-priority)
    ("D" "Decrease priority" qbittorrent-torrent-decrease-priority)]
   ["Transfer"
@@ -159,6 +161,30 @@
          (path (format "/api/v2/torrents/files?hash=%s" torrent-hash)))
     (qbittorrent-api session path
                      :then (lambda (alist) (message "Torrent content files: %s" alist)))))
+
+(defun qbittorrent-torrent-pause (&optional torrent-hash)
+  "Pause torrent."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/stop"))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash))
+                     :as 'string
+                     :then (lambda (response) (message "Paused torrent %s" torrent-hash)))))
+
+(defun qbittorrent-torrent-resume (&optional torrent-hash)
+  "Resume torrent."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/start"))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash))
+                     :as 'string
+                     :then (lambda (response) (message "Resumed torrent %s" torrent-hash)))))
 
 (defun qbittorrent-torrent-increase-priority (&optional torrent-hash)
   "Increase torrent priority."
