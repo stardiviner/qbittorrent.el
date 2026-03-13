@@ -80,7 +80,9 @@ Supports :method, :params, :then, :else, and passes other keys to plz."
       (if (eq method 'get)
           (setq url (concat url "?" (url-build-query-string params)))
         (setq request-args (append request-args
-                                   (list :body (url-build-query-string params))
+                                   (list :body (url-build-query-string (if (and params (consp params) (not (listp (car params))))
+                                                                           (list params)
+                                                                         params)))
                                    (list :headers (append headers '(("Content-Type" . "application/x-www-form-urlencoded"))))))))
     (when then (setq request-args (append request-args (list :then then))))
     (when else (setq request-args (append request-args (list :else else))))
