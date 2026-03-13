@@ -84,7 +84,8 @@
    ("T" "Trackers" qbittorrent-torrent-trackers)
    ("W" "Webseed" qbittorrent-torrent-webseeds)
    ("F" "Files" qbittorrent-torrent-files)
-   ("I" "Increase priority" qbittorrent-torrent-increase-priority)]
+   ("I" "Increase priority" qbittorrent-torrent-increase-priority)
+   ("D" "Decrease priority" qbittorrent-torrent-decrease-priority)]
   ["Transfer"
    ("i" "Info" qbittorrent-transfer-info)
    ("S" "Speed limits mode" qbittorrent-transfer-speed-limits-mode)]
@@ -167,7 +168,18 @@
          (path "/api/v2/torrents/increasePrio"))
     (qbittorrent-api session path
                      :method 'post
-                     :params `(("hashes" ,torrent-hash))
+                     :params `(("hashes" ,torrent-hash)) ; FIXME:
+                     :then (lambda (alist) (message "Torrent priority: %s" alist)))))
+
+(defun qbittorrent-torrent-decrease-priority (&optional torrent-hash)
+  "Decrease torrent priority."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/decreasePrio"))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash)) ; FIXME:
                      :then (lambda (alist) (message "Torrent priority: %s" alist)))))
 
 ;;;;;; Transfer
