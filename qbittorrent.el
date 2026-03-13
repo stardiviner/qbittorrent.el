@@ -76,10 +76,10 @@
 
 (transient-define-prefix qbittorrent-dispatch ()
   "Transient menu for the qbittorrent-mode"
-  ["Add"
-   ("f" "Add new torrent with file" qbittorrent-add-torrent-file)
-   ("m" "Add new torrent with magnet" qbittorrent-add-magnet-link)]
   ["Torrent"
+   ["Add"
+    ("f" "Add torrent with file" qbittorrent-torrent-add-file)
+    ("u" "Add torrent with URL"  qbittorrent-torrent-add-url)]
    ["Info"
     ("P" "Properties" qbittorrent-torrent-properties)
     ("T" "Trackers" qbittorrent-torrent-trackers)
@@ -104,21 +104,144 @@
 
 ;;;;;; Add
 
-(defun qbittorrent-add-torrent-file (&optional torrent)
-  "Add TORRENT file."
-  (interactive)
-  (let ((input (read-file-name "Select torrent file: ")))
-    (when (file-readable-p input)
-      ;; FIXME: do post api implementation
-      (message "uploading"))))
+;; #+begin_example
+;; POST /api/v2/torrents/add HTTP/1.1
+;; 
+;; Content-Type: multipart/form-data; boundary=-------------------------acebdf13572468
+;; User-Agent: Fiddler
+;; Host: 127.0.0.1
+;; Cookie: SID=your_sid
+;; Content-Length: length
+;; 
+;; ---------------------------acebdf13572468
+;; Content-Disposition: form-data; name="torrents"; filename="8f18036b7a205c9347cb84a253975e12f7adddf2.torrent"
+;; Content-Type: application/x-bittorrent
+;; 
+;; file_binary_data_goes_here
+;; ---------------------------acebdf13572468
+;; Content-Disposition: form-data; name="torrents"; filename="UFS.torrent"
+;; Content-Type: application/x-bittorrent
+;; 
+;; file_binary_data_goes_here
+;; ---------------------------acebdf13572468--
+;; #+end_example
+;; 
 
-(defun qbittorrent-add-magnet-link (&optional link)
-  "Add new magnet LINK."
-  (interactive)
-  (let ((input (read-string "Magnet Link: ")))
-    (when (file-readable-p input)
-      ;; FIXME: do post api implementation
-      (message "uploading"))))
+;; TEST
+(defun qbittorrent-torrent-add-file (&optional torrent-file)
+  "Add TORRENT-FILE to qBittorrent via Web API."
+  (interactive "fSelect torrent file: ")
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/add")
+         (boundary "---------------------------acebdf13572468")
+         (filename (file-name-nondirectory torrent-file))
+         (file-data (with-temp-buffer
+                      (insert-file-contents-literally torrent-file)
+                      (buffer-string)))
+         (body (string-join
+                (list
+                 (concat "--" boundary)
+                 (format "Content-Disposition: form-data; name=\"torrents\"; filename=\"%s\"" filename)
+                 "Content-Type: application/x-bittorrent"
+                 ""
+                 file-data
+                 (concat "--" boundary "--"))
+                "\r\n")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :headers `(("Content-Type" . ,(format "multipart/form-data; boundary=%s" boundary)))
+                     :as 'string
+                     :body body
+                     :then (lambda (_response) (message "New torrent added"))
+                     :else #'qbittorrent-api--signal-error)))
+
+
+;; #+begin_example
+;; POST /api/v2/torrents/add HTTP/1.1
+;; 
+;; User-Agent: Fiddler
+;; Host: 127.0.0.1
+;; Cookie: SID=your_sid
+;; Content-Type: multipart/form-data; boundary=---------------------------6688794727912
+;; Content-Length: length
+;; 
+;; -----------------------------6688794727912
+;; Content-Disposition: form-data; name="urls"
+;; 
+;; https://torcache.net/torrent/3B1A1469C180F447B77021074DBBCCAEF62611E7.torrent
+;; https://torcache.net/torrent/3B1A1469C180F447B77021074DBBCCAEF62611E8.torrent
+;; -----------------------------6688794727912
+;; Content-Disposition: form-data; name="savepath"
+;; 
+;; C:/Users/qBit/Downloads
+;; -----------------------------6688794727912
+;; Content-Disposition: form-data; name="category"
+;; 
+;; movies
+;; -----------------------------6688794727912
+;; Content-Disposition: form-data; name="skip_checking"
+;; 
+;; true
+;; -----------------------------6688794727912
+;; Content-Disposition: form-data; name="paused"
+;; 
+;; true
+;; -----------------------------6688794727912
+;; Content-Disposition: form-data; name="root_folder"
+;; 
+;; true
+;; -----------------------------6688794727912--
+;; #+end_example
+;; 
+
+;; TEST:
+(defun qbittorrent-torrent-add-url (&optional torrent-url)
+  "Add TORRENT-URL and extra options via multipart/form-data."
+  (interactive "sTorrent URL(s): ")
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/add")
+         (boundary "-----------------------------6688794727912")
+         (savepath (read-string "Save path: " ""))
+         (category (read-string "Category: " ""))
+         (skip_checking (read-string "Skip checking (true/false): " "true"))
+         (paused (read-string "Paused (true/false): " "true"))
+         (root_folder (read-string "Root folder (true/false): " "true"))
+         (body (string-join
+                (list
+                 (concat "--" boundary)
+                 "Content-Disposition: form-data; name=\"urls\""
+                 ""
+                 torrent-url
+                 (concat "--" boundary)
+                 "Content-Disposition: form-data; name=\"savepath\""
+                 ""
+                 savepath
+                 (concat "--" boundary)
+                 "Content-Disposition: form-data; name=\"category\""
+                 ""
+                 category
+                 (concat "--" boundary)
+                 "Content-Disposition: form-data; name=\"skip_checking\""
+                 ""
+                 skip_checking
+                 (concat "--" boundary)
+                 "Content-Disposition: form-data; name=\"paused\""
+                 ""
+                 paused
+                 (concat "--" boundary)
+                 "Content-Disposition: form-data; name=\"root_folder\""
+                 ""
+                 root_folder
+                 (concat "--" boundary "--"))
+                "\r\n")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :headers `(("Content-Type" . ,(format "multipart/form-data; boundary=%s" boundary)))
+                     :as 'string
+                     :body body
+                     :then (lambda (_response) (message "Torrent added"))
+                     :else #'qbittorrent-api--signal-error)))
+
 ;;;;;; Torrent
 
 ;;;;;;; Torrent Info
