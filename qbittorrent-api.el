@@ -69,9 +69,9 @@ USERNAME and PASSWORD can be null if in trusted LAN"
 
 ;;; wrapper for calling API
 
-(cl-defun qbittorrent-api (session path &key (method 'get) params then else (as 'json-read) &allow-other-keys)
+(cl-defun qbittorrent-api (session path &key (method 'get) params headers then else (as 'json-read) &allow-other-keys)
   "Call qBittorrent API at PATH using SESSION.
-Supports :method, :params, :then, :else, :as and passes other keys to plz."
+Supports :method, :params, :headers, :then, :else, :as and passes other keys to plz."
   (let* ((base-url (concat (qbittorrent-api-session-baseurl session) path))
          (base-headers `(("Cookie" . ,(qbittorrent-api-session-cookie session))))
          (query-list
@@ -85,14 +85,20 @@ Supports :method, :params, :then, :else, :as and passes other keys to plz."
                       base-url))
          (body (when (and query-list (not (eq method 'get)))
                  (url-build-query-string query-list)))
-         (final-headers (if body
-                            (append base-headers '(("Content-Type" . "application/x-www-form-urlencoded")))
-                          base-headers))
-         (request-args (append (list method built-url :headers final-headers :as as)
-                               (when body (list :body body)))))
-    (when then (setq request-args (append request-args (list :then then))))
-    (when else (setq request-args (append request-args (list :else else))))
-    (apply #'plz request-args)))
+         ;; merge headers: start with base, then override with user-provided headers
+         (merged-headers (copy-sequence base-headers)))
+    (when headers
+      (dolist (h headers)
+        (let ((k (car h)) (v (cdr h)))
+          (setf (alist-get k merged-headers nil nil #'equal) v))))
+    ;; ensure Content-Type when body is present, unless user provided one
+    (when (and body (not (alist-get "Content-Type" merged-headers nil nil #'equal)))
+      (setf (alist-get "Content-Type" merged-headers nil nil #'equal) "application/x-www-form-urlencoded"))
+    (let ((request-args (append (list method built-url :headers merged-headers :as as)
+                                (when body (list :body body)))))
+      (when then (setq request-args (append request-args (list :then then))))
+      (when else (setq request-args (append request-args (list :else else))))
+      (apply #'plz request-args))))
 
 ;;; Authentication
 
