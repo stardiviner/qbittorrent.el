@@ -69,11 +69,10 @@ USERNAME and PASSWORD can be null if in trusted LAN"
 
 ;;; wrapper for calling API
 
-(cl-defun qbittorrent-api (session path &key method params then else &allow-other-keys)
+(cl-defun qbittorrent-api (session path &key (method 'get) params then else (as 'json-read) &allow-other-keys)
   "Call qBittorrent API at PATH using SESSION.
-Supports :method, :params, :then, :else, and passes other keys to plz."
-  (let* ((method (or method 'get))
-         (base-url (concat (qbittorrent-api-session-baseurl session) path))
+Supports :method, :params, :then, :else, :as and passes other keys to plz."
+  (let* ((base-url (concat (qbittorrent-api-session-baseurl session) path))
          (base-headers `(("Cookie" . ,(qbittorrent-api-session-cookie session))))
          (query-list
           (when params
@@ -89,7 +88,7 @@ Supports :method, :params, :then, :else, and passes other keys to plz."
          (final-headers (if body
                             (append base-headers '(("Content-Type" . "application/x-www-form-urlencoded")))
                           base-headers))
-         (request-args (append (list method built-url :headers final-headers :as 'json-read)
+         (request-args (append (list method built-url :headers final-headers :as as)
                                (when body (list :body body)))))
     (when then (setq request-args (append request-args (list :then then))))
     (when else (setq request-args (append request-args (list :else else))))
