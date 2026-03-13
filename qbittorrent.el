@@ -80,15 +80,18 @@
    ("f" "Add new torrent with file" qbittorrent-add-torrent-file)
    ("m" "Add new torrent with magnet" qbittorrent-add-magnet-link)]
   ["Torrent"
-   ("P" "Properties" qbittorrent-torrent-properties)
-   ("T" "Trackers" qbittorrent-torrent-trackers)
-   ("W" "Webseed" qbittorrent-torrent-webseeds)
-   ("F" "Files" qbittorrent-torrent-files)
-   ("p" "Puase" qbittorrent-torrent-pause)
-   ("r" "Resume" qbittorrent-torrent-resume)
-   ("D" "Delete" qbittorrent-torrent-delete)
-   ("i" "Increase priority" qbittorrent-torrent-increase-priority)
-   ("d" "Decrease priority" qbittorrent-torrent-decrease-priority)]
+   ["Info"
+    ("P" "Properties" qbittorrent-torrent-properties)
+    ("T" "Trackers" qbittorrent-torrent-trackers)
+    ("W" "Webseed" qbittorrent-torrent-webseeds)
+    ("F" "Files" qbittorrent-torrent-files)]
+   ["Actions"
+    ("p" "Puase" qbittorrent-torrent-pause)
+    ("r" "Resume" qbittorrent-torrent-resume)
+    ("D" "Delete" qbittorrent-torrent-delete)]
+   ["Priority"
+    ("i" "Increase priority" qbittorrent-torrent-increase-priority)
+    ("d" "Decrease priority" qbittorrent-torrent-decrease-priority)]]
   ["Transfer"
    ("I" "Info" qbittorrent-transfer-info)
    ("S" "Speed limits mode" qbittorrent-transfer-speed-limits-mode)]
