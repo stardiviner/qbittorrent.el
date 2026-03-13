@@ -76,15 +76,24 @@
 
 (transient-define-prefix qbittorrent-dispatch ()
   "Transient menu for the qbittorrent-mode"
-  ["Actions"
-   ("a" "Add" qbittorrent-dispatch-add)])
+  ["Add"
+   ("f" "Add new torrent with file" qbittorrent-add-torrent-file)
+   ("m" "Add new torrent with magnet" qbittorrent-add-magnet-link)]
+  ["Torrent"
+   ("P" "Properties" qbittorrent-torrent-properties)
+   ("T" "Trackers" qbittorrent-torrent-trackers)
+   ("W" "Webseed" qbittorrent-torrent-webseeds)
+   ("F" "Files" qbittorrent-torrent-files)]
+  ["Transfer"
+   ("i" "Info" qbittorrent-transfer-info)
+   ("S" "Speed limits mode" qbittorrent-transfer-speed-limits-mode)]
+  ["Log"
+   ("l" "Logs" qbittorrent-log-main)
+   ("p" "Peers" qbittorrent-log-peers)])
 
-(transient-define-prefix qbittorrent-dispatch-add ()
-  "Add new torrent menu for the qbittorrent-mode"
-  [("f" "Add new torrent with file" qbittorrent-add-torrent-file)
-   ("m" "Add new torrent with magnet" qbittorrent-add-magnet-link)])
+;;;;; Transient functions
 
-;;;; Functions
+;;;;;; Add
 
 (defun qbittorrent-add-torrent-file (&optional torrent)
   "Add TORRENT file."
@@ -101,6 +110,122 @@
     (when (file-readable-p input)
       ;; FIXME: do post api implementation
       (message "uploading"))))
+;;;;;; Torrent
+
+(defun qbittorrent-torrent-list ()
+  "Show torrent info."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/info"))
+    (qbittorrent-api
+     session path
+     :then (lambda (valist) (message "Torrent list:\n%S" (string-join (mapcar (lambda (alist) (cdr (assoc 'name alist))) valist) "\n"))))))
+
+(defun qbittorrent--get-torrent-hash-at-point ()
+  "Get the hash of torrent at point in `tabulated-list-mode' of buffer \"*qBittorrent*\"."
+  (tabulated-list-get-id (line-number-at-pos)))
+
+(defun qbittorrent-torrent-properties (&optional torrent-hash)
+  "Show torrent properties."
+  (interactive)
+  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+         (session (qbittorrent--ensure-api-session))
+         (path (format "/api/v2/torrents/properties?hash=%s" torrent-hash)))
+    (qbittorrent-api
+     session path
+     :then (lambda (alist) (message "Torrent properties: %s" alist)))))
+
+(defun qbittorrent-torrent-trackers (&optional torrent-hash)
+  "Show torrent trackers."
+  (interactive)
+  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+         (session (qbittorrent--ensure-api-session))
+         (path (format "/api/v2/torrents/trackers?hash=%s" torrent-hash)))
+    (qbittorrent-api
+     session path
+     :then (lambda (alist) (message "Torrent trackers: %s" alist)))))
+
+(defun qbittorrent-torrent-webseeds (&optional torrent-hash)
+  "Show torrent webseeds."
+  (interactive)
+  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+         (session (qbittorrent--ensure-api-session))
+         (path (format "/api/v2/torrents/webseeds?hash=%s" torrent-hash)))
+    (qbittorrent-api
+     session path
+     :then (lambda (alist) (message "Torrent webseeds: %s" alist)))))
+
+(defun qbittorrent-torrent-files (&optional torrent-hash)
+  "Show torrent content files."
+  (interactive)
+  (let* ((torrent-hash (qbittorrent--get-torrent-hash-at-point))
+         (session (qbittorrent--ensure-api-session))
+         (path (format "/api/v2/torrents/files?hash=%s" torrent-hash)))
+    (qbittorrent-api
+     session path
+     :then (lambda (alist) (message "Torrent content files: %s" alist)))))
+
+;;;;;; Transfer
+
+(defun qbittorrent-transfer-get-speed-limits-mode ()
+  "Get speed limits mode."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/transfer/speedLimitsMode")
+         (status (qbittorrent-api session path)))
+    (if (zerop status) t nil)))
+
+(defun qbittorrent-transfer-info ()
+  "Show transfer info."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/transfer/info"))
+    (qbittorrent-api
+     session path
+     :then (lambda (valist) (message "Transfer info: %S" valist)))))
+
+(defun qbittorrent-transfer-speed-limits-mode ()
+  "Toggle speed limits mode."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/transfer/toggleSpeedLimitsMode")) ; WARNING: method "toggleSpeedLimitsMode" not allowed.
+    (qbittorrent-api
+     session path
+     :then (lambda (valist) (message "Speed Limits Mode %s" (if (qbittorrent-transfer-get-speed-limits-mode) "enabled" "disabled"))))))
+
+;;;;;; Logs
+
+(defun qbittorrent-log-main ()
+  "View qbittorrent logs."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/log/main?normal=true&info=true&warning=true&critical=true&last_known_id=-1")
+         (response (qbittorrent-api session path)))
+    (when response
+      (let* ((logs (string-join (mapcar (lambda (alist) (cdr (assoc 'message alist))) response) "\n")))
+        (with-current-buffer (get-buffer-create "*qBittorrent logs*")
+          (let* ((inhibit-read-only t))
+            (erase-buffer)
+            (insert logs))
+          (read-only-mode 1)
+          (display-buffer (current-buffer) '(display-buffer-below-selected)))))))
+
+(defun qbittorrent-log-peers ()
+  "View qbittorrent peers."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/log/peers")
+         (response (qbittorrent-api session path)))
+    (when response
+      (let* ((logs (string-join (mapcar (lambda (alist) (cdr (assoc 'reason alist))) response) "\n")))
+        (with-current-buffer (get-buffer-create "*qBittorrent peers*")
+          (let* ((inhibit-read-only t))
+            (erase-buffer)
+            (insert logs))
+          (read-only-mode 1)
+          (display-buffer (current-buffer) '(display-buffer-below-selected)))))))
+
+;;;; tabulated-list-mode
 
 (defun qbittorrent--torrent-eta (torrent)
   "Return human readable eta for TORRENT."
@@ -119,14 +244,14 @@
 
 (defun qbittorrent--draw-torrents (torrents)
   "Parse the TORRENTS and update tabulated list."
-  (when-let ((buffer (get-buffer qbittorrent-buffer)))
+  (when-let* ((buffer (get-buffer qbittorrent-buffer)))
     (with-current-buffer buffer
       ;; (setq-local tabulated-list-format nil)
       (setq-local tabulated-list-use-header-line t)
       (setq-local tabulated-list-entries
                   (cl-map 'list
                           (lambda (torrent)
-                            (list (alist-get 'name torrent)
+                            (list (alist-get 'hash torrent) ; for `tabulated-list-get-id' in `qbittorrent--get-torrent-hash-at-point'
                                   (vector
                                    ;; Name
                                    (propertize (string-limit (alist-get 'name torrent) 60)
@@ -160,23 +285,15 @@
 
 (defun qbittorrent--refresh-torrents ()
   "Poll torrents info from server."
-  ;; TODO: add sort
-  (let ((session (qbittorrent--ensure-api-session)))
-    (qbittorrent-api
-     session
-     (format "/api/v2/torrents/info?sort=%s&reverse=true" qbittorrent--sort-by)
-     :then #'qbittorrent--draw-torrents)))
-
-(defun qbittorrent-quit ()
-  "Quit qBittorrent and kill the buffer."
-  (interactive)
-  (when-let ((buffer (get-buffer qbittorrent-buffer)))
-    (kill-buffer buffer)))
+  (let ((session (qbittorrent--ensure-api-session))
+        (path (format "/api/v2/torrents/info?sort=%s&reverse=true" qbittorrent--sort-by)))
+    (qbittorrent-api session path :then #'qbittorrent--draw-torrents)))
 
 (define-derived-mode qbittorrent-mode tabulated-list-mode "qBittorrent"
   "Major mode for list of torrents in a qBittorrent server."
   :group 'qbittorrent
   (setq-local line-move-visual nil)
+  (setq tabulated-list-padding 1)
   (setq-local tabulated-list-format
               [("Name" 60 t :left-align t)
                ("Size" 8 >= :right-align t)
@@ -187,9 +304,10 @@
                ("Ratio" 5 >= :right-align t)
                ("Status" 12 t)
                ("Added on" 22 t :left-align t)])
-  (setq tabulated-list-padding 1)
   (setq tabulated-list-revert-hook #'qbittorrent--refresh-torrents)
   (tabulated-list-init-header))
+
+;;;; Commands
 
 ;;;###autoload
 (defun qbittorrent()
@@ -201,6 +319,12 @@
       (qbittorrent--refresh-torrents)
       (goto-char (point-min)))
     (switch-to-buffer buffer)))
+
+(defun qbittorrent-quit ()
+  "Quit qBittorrent and kill the buffer."
+  (interactive)
+  (when-let* ((buffer (get-buffer qbittorrent-buffer)))
+    (kill-buffer buffer)))
 
 (provide 'qbittorrent)
 ;;; qbittorrent.el ends here
