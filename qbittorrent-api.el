@@ -69,14 +69,21 @@ USERNAME and PASSWORD can be null if in trusted LAN"
 
 ;;; wrapper for calling API
 
-(cl-defun qbittorrent-api (session path &key (method 'get) (then 'sync))
-  "Call API at PATH in SESSION."
-  (let* ((url (format "%s%s" (qbittorrent-api-session-baseurl session) path)))
-    (plz method url
-      :as 'json-read
-      :headers `(("Cookie" . ,(qbittorrent-api-session-cookie session)))
-      :else #'qbittorrent-api--signal-error
-      :then then)))
+(cl-defun qbittorrent-api (session path &key method params then else &allow-other-keys)
+  "Call qBittorrent API at PATH using SESSION.
+Supports :method, :params, :then, :else, and passes other keys to plz."
+  (let* ((method (or method 'get))
+         (url (concat (qbittorrent-api-session-baseurl session) path))
+         (headers `(("Cookie" . ,(qbittorrent-api-session-cookie session))))
+         (request-args (list method url :headers headers :as 'json-read)))
+    (when params
+      (if (eq method 'get)
+          (setq url (concat url "?" (url-build-query-string params)))
+        (setq request-args (append request-args (list :body (url-build-query-string params))
+                                   (list :headers (append headers '(("Content-Type" . "application/x-www-form-urlencoded"))))))))
+    (when then (setq request-args (append request-args (list :then then))))
+    (when else (setq request-args (append request-args (list :else else))))
+    (apply #'plz request-args)))
 
 ;;; Authentication
 
