@@ -123,7 +123,7 @@
 
 (defun qbittorrent--get-torrent-hash-at-point ()
   "Get the hash of torrent at point in `tabulated-list-mode' of buffer \"*qBittorrent*\"."
-  (tabulated-list-get-id (line-number-at-pos)))
+  (tabulated-list-get-id))
 
 (defun qbittorrent-torrent-properties (&optional torrent-hash)
   "Show torrent properties."
