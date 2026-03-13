@@ -107,23 +107,62 @@
 ;; #+begin_example
 ;; POST /api/v2/torrents/add HTTP/1.1
 ;; 
-;; Content-Type: multipart/form-data; boundary=-------------------------acebdf13572468
+;; Content-Type: multipart/form-data; boundary=------WebKitFormBoundaryK83RJd8UOJnwEINW
 ;; User-Agent: Fiddler
 ;; Host: 127.0.0.1
 ;; Cookie: SID=your_sid
 ;; Content-Length: length
 ;; 
-;; ---------------------------acebdf13572468
-;; Content-Disposition: form-data; name="torrents"; filename="8f18036b7a205c9347cb84a253975e12f7adddf2.torrent"
-;; Content-Type: application/x-bittorrent
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="fileselect[]"; filename="kk.torrent"
+;; Content-Type: application/octet-stream
 ;; 
-;; file_binary_data_goes_here
-;; ---------------------------acebdf13572468
-;; Content-Disposition: form-data; name="torrents"; filename="UFS.torrent"
-;; Content-Type: application/x-bittorrent
 ;; 
-;; file_binary_data_goes_here
-;; ---------------------------acebdf13572468--
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="autoTMM"
+;; 
+;; false
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="savepath"
+;; 
+;; /downloads
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="rename"
+;; 
+;; kk
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="category"
+;; 
+;; 
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="stopped"
+;; 
+;; false
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="addToTopOfQueue"
+;; 
+;; true
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="stopCondition"
+;; 
+;; None
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="contentLayout"
+;; 
+;; Original
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="firstLastPiecePrio"
+;; 
+;; true
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="dlLimit"
+;; 
+;; 0
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW
+;; Content-Disposition: form-data; name="upLimit"
+;; 
+;; 0
+;; ------WebKitFormBoundaryK83RJd8UOJnwEINW--
 ;; #+end_example
 ;; 
 
@@ -133,26 +172,72 @@
   (interactive "fSelect torrent file: ")
   (let* ((session (qbittorrent--ensure-api-session))
          (path "/api/v2/torrents/add")
-         (boundary "---------------------------acebdf13572468")
-         (filename (file-name-nondirectory torrent-file))
-         (file-data (with-temp-buffer
-                      (insert-file-contents-literally torrent-file)
-                      (buffer-string)))
+         (boundary "------WebKitFormBoundaryUKn3jE4Czae8JlX7")
+         (autoTMM (read-string "Torrent 管理模式 (true/false): " "false"))
+         (savepath (read-string "Save path: " "/downloads"))
+         (rename (read-string "Rename torrent: "))
+         (category (read-string "Category: "))
+         (stopped (read-string "开始 torrent (true/false): " "false"))
+         (addToTopQueue (read-string "添加到队列顶部 (true/false): " "true"))
+         (stopCondition (read-string "停止条件: " "None"))
+         (contentLayout (read-string "内容布局: " "Original"))
+         (dlLimit (read-string "限制下载速率: " "0"))
+         (upLimit (read-string "限制上传速率: " "0"))
          (body (string-join
                 (list
-                 (concat "--" boundary)
-                 (format "Content-Disposition: form-data; name=\"torrents\"; filename=\"%s\"" filename)
-                 "Content-Type: application/x-bittorrent"
-                 ""
-                 file-data
-                 (concat "--" boundary "--"))
+                 boundary
+                 (format "Content-Disposition: form-data; name=\"fileselect[]\"; filename=\"%s\"" (expand-file-name torrent-file))
+                 "\n"
+                 "Content-Type: application/octet-stream"
+                 "\n\n\n"
+                 boundary
+                 "Content-Disposition: form-data; name=\"autoTMM\""
+                 "\n\n"
+                 autoTMM
+                 boundary
+                 "Content-Disposition: form-data; name=\"savepath\""
+                 "\n\n"
+                 savepath
+                 boundary
+                 "Content-Disposition: form-data; name=\"rename\""
+                 "\n\n"
+                 rename
+                 boundary
+                 "Content-Disposition: form-data; name=\"category\""
+                 "\n\n"
+                 category
+                 boundary
+                 "Content-Disposition: form-data; name=\"stopped\""
+                 "\n\n"
+                 stopped
+                 boundary
+                 "Content-Disposition: form-data; name=\"addToTopOfQueue\""
+                 "\n\n"
+                 addToTopQueue
+                 boundary
+                 "Content-Disposition: form-data; name=\"stopCondition\""
+                 "\n\n"
+                 stopCondition
+                 boundary
+                 "Content-Disposition: form-data; name=\"contentLayout\""
+                 "\n\n"
+                 contentLayout
+                 boundary
+                 "Content-Disposition: form-data; name=\"dlLimit\""
+                 "\n\n"
+                 dlLimit
+                 boundary
+                 "Content-Disposition: form-data; name=\"upLimit\""
+                 "\n\n"
+                 upLimit
+                 boundary)
                 "\r\n")))
     (qbittorrent-api session path
                      :method 'post
                      :headers `(("Content-Type" . ,(format "multipart/form-data; boundary=%s" boundary)))
                      :as 'string
                      :body body
-                     :then (lambda (_response) (message "New torrent added"))
+                     :then (lambda (_response) (message "Torrent added"))
                      :else #'qbittorrent-api--signal-error)))
 
 
@@ -162,35 +247,54 @@
 ;; User-Agent: Fiddler
 ;; Host: 127.0.0.1
 ;; Cookie: SID=your_sid
-;; Content-Type: multipart/form-data; boundary=---------------------------6688794727912
+;; Content-Type: multipart/form-data; boundary=------WebKitFormBoundaryUKn3jE4Czae8JlX7
 ;; Content-Length: length
 ;; 
-;; -----------------------------6688794727912
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
 ;; Content-Disposition: form-data; name="urls"
 ;; 
-;; https://torcache.net/torrent/3B1A1469C180F447B77021074DBBCCAEF62611E7.torrent
-;; https://torcache.net/torrent/3B1A1469C180F447B77021074DBBCCAEF62611E8.torrent
-;; -----------------------------6688794727912
+;; magnet:?xt=urn:btih:1057cdf7f8a82fa479077b42d6b2399cde3013d1&dn=%E6%8D%A2%E5%A6%BB.HD1280%E9%AB%98%E6%B8%85%E9%9F%A9%E8%AF%AD%E4%B8%AD%E5%AD%97.mp4
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="autoTMM"
+;; 
+;; false
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
 ;; Content-Disposition: form-data; name="savepath"
 ;; 
-;; C:/Users/qBit/Downloads
-;; -----------------------------6688794727912
+;; /downloads
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="rename"
+;; 
+;; 两个妻子 두 아내 (2014)
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
 ;; Content-Disposition: form-data; name="category"
 ;; 
-;; movies
-;; -----------------------------6688794727912
-;; Content-Disposition: form-data; name="skip_checking"
+;; 
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="stopped"
+;; 
+;; false
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="addToTopOfQueue"
 ;; 
 ;; true
-;; -----------------------------6688794727912
-;; Content-Disposition: form-data; name="paused"
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="stopCondition"
 ;; 
-;; true
-;; -----------------------------6688794727912
-;; Content-Disposition: form-data; name="root_folder"
+;; None
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="contentLayout"
 ;; 
-;; true
-;; -----------------------------6688794727912--
+;; Original
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="dlLimit"
+;; 
+;; 0
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7
+;; Content-Disposition: form-data; name="upLimit"
+;; 
+;; 0
+;; ------WebKitFormBoundaryUKn3jE4Czae8JlX7--
 ;; #+end_example
 ;; 
 
@@ -200,39 +304,64 @@
   (interactive "sTorrent URL(s): ")
   (let* ((session (qbittorrent--ensure-api-session))
          (path "/api/v2/torrents/add")
-         (boundary "-----------------------------6688794727912")
-         (savepath (read-string "Save path: " ""))
-         (category (read-string "Category: " ""))
-         (skip_checking (read-string "Skip checking (true/false): " "true"))
-         (paused (read-string "Paused (true/false): " "true"))
-         (root_folder (read-string "Root folder (true/false): " "true"))
+         (boundary "------WebKitFormBoundaryUKn3jE4Czae8JlX7")
+         (autoTMM (read-string "Torrent 管理模式 (true/false): " "false"))
+         (savepath (read-string "Save path: " "/downloads"))
+         (rename (read-string "Rename torrent: "))
+         (category (read-string "Category: "))
+         (stopped (read-string "开始 torrent (true/false): " "false"))
+         (addToTopQueue (read-string "添加到队列顶部 (true/false): " "true"))
+         (stopCondition (read-string "停止条件: " "None"))
+         (contentLayout (read-string "内容布局: " "Original"))
+         (dlLimit (read-string "限制下载速率: " "0"))
+         (upLimit (read-string "限制上传速率: " "0"))
          (body (string-join
                 (list
-                 (concat "--" boundary)
+                 boundary
                  "Content-Disposition: form-data; name=\"urls\""
-                 ""
+                 "\n\n"
                  torrent-url
-                 (concat "--" boundary)
+                 boundary
+                 "Content-Disposition: form-data; name=\"autoTMM\""
+                 "\n\n"
+                 autoTMM
+                 boundary
                  "Content-Disposition: form-data; name=\"savepath\""
-                 ""
+                 "\n\n"
                  savepath
-                 (concat "--" boundary)
+                 boundary
+                 "Content-Disposition: form-data; name=\"rename\""
+                 "\n\n"
+                 rename
+                 boundary
                  "Content-Disposition: form-data; name=\"category\""
-                 ""
+                 "\n\n"
                  category
-                 (concat "--" boundary)
-                 "Content-Disposition: form-data; name=\"skip_checking\""
-                 ""
-                 skip_checking
-                 (concat "--" boundary)
-                 "Content-Disposition: form-data; name=\"paused\""
-                 ""
-                 paused
-                 (concat "--" boundary)
-                 "Content-Disposition: form-data; name=\"root_folder\""
-                 ""
-                 root_folder
-                 (concat "--" boundary "--"))
+                 boundary
+                 "Content-Disposition: form-data; name=\"stopped\""
+                 "\n\n"
+                 stopped
+                 boundary
+                 "Content-Disposition: form-data; name=\"addToTopOfQueue\""
+                 "\n\n"
+                 addToTopQueue
+                 boundary
+                 "Content-Disposition: form-data; name=\"stopCondition\""
+                 "\n\n"
+                 stopCondition
+                 boundary
+                 "Content-Disposition: form-data; name=\"contentLayout\""
+                 "\n\n"
+                 contentLayout
+                 boundary
+                 "Content-Disposition: form-data; name=\"dlLimit\""
+                 "\n\n"
+                 dlLimit
+                 boundary
+                 "Content-Disposition: form-data; name=\"upLimit\""
+                 "\n\n"
+                 upLimit
+                 boundary)
                 "\r\n")))
     (qbittorrent-api session path
                      :method 'post
