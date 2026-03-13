@@ -281,11 +281,20 @@
 
 (defun qbittorrent--torrent-status (torrent)
   "Return human readable status for TORRENT."
-  (let ((state (alist-get 'state torrent)))
-    (pcase state
-      ((or (pred (string-suffix-p "UP")) "uploading") "seeding")
-      ((pred (string-suffix-p "DL")) "downloading")
-      (_ state))))
+  (let* ((state (alist-get 'state torrent))
+         (s (when state (downcase state))))
+    (cond
+     ((null s) "")
+     ((string-prefix-p "checking" s) "checking")
+     ((string-prefix-p "meta" s) "metadata")
+     ((string-prefix-p "allocating" s) "allocating")
+     ((string-prefix-p "paused" s) "paused")
+     ((string-prefix-p "queued" s) "queued")
+     ((string-prefix-p "stalled" s) "stalled")
+     ((or (string-suffix-p "UP" s) (string-match-p "seeding\\|upload" s)) "seeding")
+     ((or (string-suffix-p "DL" s) (string-match-p "downloading\\|download" s)) "downloading")
+     ((string= s "error") "error")
+     (t state))))
 
 (defun qbittorrent--draw-torrents (torrents)
   "Parse the TORRENTS and update tabulated list."
