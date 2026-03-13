@@ -168,8 +168,9 @@
          (path "/api/v2/torrents/increasePrio"))
     (qbittorrent-api session path
                      :method 'post
-                     :params `(("hashes" ,torrent-hash)) ; FIXME:
-                     :then (lambda (alist) (message "Torrent priority: %s" alist)))))
+                     :params `(("hashes" ,torrent-hash))
+                     :as 'string ; response body
+                     :then (lambda (response) (message "Increased torrent priority for %s" torrent-hash)))))
 
 (defun qbittorrent-torrent-decrease-priority (&optional torrent-hash)
   "Decrease torrent priority."
@@ -179,8 +180,9 @@
          (path "/api/v2/torrents/decreasePrio"))
     (qbittorrent-api session path
                      :method 'post
-                     :params `(("hashes" ,torrent-hash)) ; FIXME:
-                     :then (lambda (alist) (message "Torrent priority: %s" alist)))))
+                     :params `(("hashes" ,torrent-hash))
+                     :as 'string ; response body
+                     :then (lambda (response) (message "Decreased torrent priority for %s" torrent-hash)))))
 
 ;;;;;; Transfer
 
