@@ -117,15 +117,6 @@
       ((pred (string-suffix-p "DL")) "downloading")
       (_ state))))
 
-(defun qbittorrent--ensure-api-session ()
-  "Create a new api session if not already created."
-  (if qbittorrent--api-session
-      qbittorrent--api-session
-    (setq qbittorrent--api-session
-          (qbittorrent-api-login
-           (make-qbittorrent-api-session :baseurl qbittorrent-baseurl)
-           qbittorrent-username qbittorrent-password))))
-
 (defun qbittorrent--draw-torrents (torrents)
   "Parse the TORRENTS and update tabulated list."
   (when-let ((buffer (get-buffer qbittorrent-buffer)))

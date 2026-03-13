@@ -70,13 +70,24 @@ USERNAME and PASSWORD can be null if in trusted LAN"
 ;;; wrapper for calling API
 
 (cl-defun qbittorrent-api (session path &key (method 'get) (then 'sync))
-  "Call api at PATH in SESSION."
+  "Call API at PATH in SESSION."
   (let* ((url (format "%s%s" (qbittorrent-api-session-baseurl session) path)))
     (plz method url
       :as 'json-read
       :headers `(("Cookie" . ,(qbittorrent-api-session-cookie session)))
       :else #'qbittorrent-api--signal-error
       :then then)))
+
+;;; Authentication
+
+(defun qbittorrent--ensure-api-session ()
+  "Create a new api session if not already created."
+  (if qbittorrent--api-session
+      qbittorrent--api-session
+    (setq qbittorrent--api-session
+          (qbittorrent-api-login
+           (make-qbittorrent-api-session :baseurl qbittorrent-baseurl)
+           qbittorrent-username qbittorrent-password))))
 
 (provide 'qbittorrent-api)
 ;;; qbittorrent-api.el ends here
