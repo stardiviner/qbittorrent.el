@@ -120,6 +120,8 @@
       (message "uploading"))))
 ;;;;;; Torrent
 
+;;;;;;; Torrent Info
+
 (defun qbittorrent-torrent-list ()
   "Show torrent info."
   (interactive)
@@ -166,6 +168,8 @@
     (qbittorrent-api session path
                      :then (lambda (alist) (message "Torrent content files: %s" alist)))))
 
+;;;;;;; Operations
+
 (defun qbittorrent-torrent-pause (&optional torrent-hash)
   "Pause torrent."
   (interactive)
@@ -201,6 +205,8 @@
                      :params `(("hashes" ,torrent-hash))
                      :as 'string
                      :then (lambda (response) (message "Deleted torrent %s" torrent-hash)))))
+
+;;;;;;; Priority
 
 (defun qbittorrent-torrent-increase-priority (&optional torrent-hash)
   "Increase torrent priority."
@@ -254,7 +260,7 @@
                              (message "Speed Limits Mode %s"
                                       (if (qbittorrent-transfer-get-speed-limits-mode) "enabled" "disabled"))))))
 
-;;;;;; Logs
+;;;;;; Log
 
 (defun qbittorrent-log-main ()
   "View qbittorrent logs."
