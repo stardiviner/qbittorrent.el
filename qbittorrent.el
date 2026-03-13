@@ -167,7 +167,7 @@
          (path "/api/v2/torrents/increasePrio"))
     (qbittorrent-api session path
                      :method 'post
-                     :params `(("hashes" . ,torrent-hash))
+                     :params `(("hashes" ,torrent-hash))
                      :then (lambda (alist) (message "Torrent priority: %s" alist)))))
 
 ;;;;;; Transfer
