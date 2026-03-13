@@ -86,6 +86,7 @@
    ("F" "Files" qbittorrent-torrent-files)
    ("p" "Puase" qbittorrent-torrent-pause)
    ("r" "Resume" qbittorrent-torrent-resume)
+   ("d" "Delete" qbittorrent-torrent-delete)
    ("I" "Increase priority" qbittorrent-torrent-increase-priority)
    ("D" "Decrease priority" qbittorrent-torrent-decrease-priority)]
   ["Transfer"
@@ -185,6 +186,18 @@
                      :params `(("hashes" ,torrent-hash))
                      :as 'string
                      :then (lambda (response) (message "Resumed torrent %s" torrent-hash)))))
+
+(defun qbittorrent-torrent-delete (&optional torrent-hash)
+  "Delete torrent."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/delete"))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash))
+                     :as 'string
+                     :then (lambda (response) (message "Deleted torrent %s" torrent-hash)))))
 
 (defun qbittorrent-torrent-increase-priority (&optional torrent-hash)
   "Increase torrent priority."
