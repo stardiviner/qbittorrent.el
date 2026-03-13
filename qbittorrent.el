@@ -86,11 +86,11 @@
    ("F" "Files" qbittorrent-torrent-files)
    ("p" "Puase" qbittorrent-torrent-pause)
    ("r" "Resume" qbittorrent-torrent-resume)
-   ("d" "Delete" qbittorrent-torrent-delete)
-   ("I" "Increase priority" qbittorrent-torrent-increase-priority)
-   ("D" "Decrease priority" qbittorrent-torrent-decrease-priority)]
+   ("D" "Delete" qbittorrent-torrent-delete)
+   ("i" "Increase priority" qbittorrent-torrent-increase-priority)
+   ("d" "Decrease priority" qbittorrent-torrent-decrease-priority)]
   ["Transfer"
-   ("i" "Info" qbittorrent-transfer-info)
+   ("I" "Info" qbittorrent-transfer-info)
    ("S" "Speed limits mode" qbittorrent-transfer-speed-limits-mode)]
   ["Log"
    ("l" "Logs" qbittorrent-log-main)
