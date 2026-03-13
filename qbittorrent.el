@@ -126,7 +126,7 @@
 (defun qbittorrent-torrent-properties (&optional torrent-hash)
   "Show torrent properties."
   (interactive)
-  (let* ((torrent-hash (tabulated-list-get-id))
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/properties?hash=%s" torrent-hash)))
     (qbittorrent-api session path
@@ -135,7 +135,7 @@
 (defun qbittorrent-torrent-trackers (&optional torrent-hash)
   "Show torrent trackers."
   (interactive)
-  (let* ((torrent-hash (tabulated-list-get-id))
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/trackers?hash=%s" torrent-hash)))
     (qbittorrent-api session path
@@ -144,7 +144,7 @@
 (defun qbittorrent-torrent-webseeds (&optional torrent-hash)
   "Show torrent webseeds."
   (interactive)
-  (let* ((torrent-hash (tabulated-list-get-id))
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/webseeds?hash=%s" torrent-hash)))
     (qbittorrent-api session path
@@ -153,7 +153,7 @@
 (defun qbittorrent-torrent-files (&optional torrent-hash)
   "Show torrent content files."
   (interactive)
-  (let* ((torrent-hash (tabulated-list-get-id))
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
          (session (qbittorrent--ensure-api-session))
          (path (format "/api/v2/torrents/files?hash=%s" torrent-hash)))
     (qbittorrent-api session path
@@ -162,7 +162,7 @@
 (defun qbittorrent-torrent-increase-priority (&optional torrent-hash)
   "Increase torrent priority."
   (interactive)
-  (let* ((torrent-hash (tabulated-list-get-id))
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
          (session (qbittorrent--ensure-api-session))
          (path "/api/v2/torrents/increasePrio"))
     (qbittorrent-api session path
