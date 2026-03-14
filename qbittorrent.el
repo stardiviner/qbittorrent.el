@@ -637,6 +637,7 @@
                       (when limit (format "&limit=%d" limit))
                       (when offset (format "&offset=%d" offset))
                       (when reverse (format "&reverse=%s" (if (string-equal sort "added_on") "true" reverse)))))
+  (qbittorrent--refresh-torrents)
   (message "[qBittorrent] torrents info listing API: %S" qbittorrent--torrents-info-path))
 
 (defun qbittorrent--refresh-torrents ()
