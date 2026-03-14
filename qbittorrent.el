@@ -28,7 +28,6 @@
 
 (defvar-local qbittorrent--api-session nil)
 (defvar-local qbittorrent--poll-timer nil)
-(defvar-local qbittorrent--sort-by "added_on")
 
 (defvar qbittorrent-buffer "*qBittorrent*")
 
@@ -624,10 +623,25 @@
                           torrents))
       (revert-buffer))))
 
+(defvar-local qbittorrent--torrents-info-path "/api/v2/torrents/info?filter=all&sort=added_on&reverse=true"
+  "Variable used in list torrents info path for transient sorting & filtering.")
+
+(cl-defun qbittorrent--torrents-info-path-setup (&key (filter "all") (sort "added_on") category tag limit offset reverse)
+  "Construct qBittorrent torrents info path API."
+  (setq-local qbittorrent--torrents-info-path
+              (concat "/api/v2/torrents/info?"
+                      (format "filter=%s" filter)
+                      (format "&sort=%s" sort)
+                      (when category (format "&category=%s" (url-encode-url category)))
+                      (when tag (format "&tag=%s" (url-encode-url tag)))
+                      (when limit (format "&limit=%d" limit))
+                      (when offset (format "&offset=%d" offset))
+                      (when reverse (format "&reverse=%s" reverse)))))
+
 (defun qbittorrent--refresh-torrents ()
   "Poll torrents info from server."
   (let ((session (qbittorrent--ensure-api-session))
-        (path (format "/api/v2/torrents/info?sort=%s&reverse=true" qbittorrent--sort-by)))
+        (path qbittorrent--torrents-info-path))
     (qbittorrent-api session path :then #'qbittorrent--draw-torrents)))
 
 (define-derived-mode qbittorrent-mode tabulated-list-mode "qBittorrent"
