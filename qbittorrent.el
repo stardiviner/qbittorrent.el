@@ -632,8 +632,8 @@
               (concat "/api/v2/torrents/info?"
                       (format "filter=%s" filter)
                       (format "&sort=%s" sort)
-                      (when category (format "&category=%s" (url-encode-url category)))
-                      (when tag (format "&tag=%s" (url-encode-url tag)))
+                      (when category (format "&category=%s" category))
+                      (when tag (format "&tag=%s" tag))
                       (when limit (format "&limit=%d" limit))
                       (when offset (format "&offset=%d" offset))
                       (when reverse (format "&reverse=%s" (if (string-equal sort "added_on") "true" reverse)))))
