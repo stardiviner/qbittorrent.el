@@ -76,28 +76,77 @@
 (transient-define-prefix qbittorrent-dispatch ()
   "Transient menu for the qbittorrent-mode"
   ["Torrent"
-   ["Add"
-    ("f" "Add torrent with file" qbittorrent-torrent-add-file)
-    ("u" "Add torrent with URL"  qbittorrent-torrent-add-url)]
-   ["Info"
-    ("P" "Properties" qbittorrent-torrent-properties)
-    ("T" "Trackers" qbittorrent-torrent-trackers)
-    ("W" "Webseed" qbittorrent-torrent-webseeds)
-    ("F" "Files" qbittorrent-torrent-files)]
-   ["Actions"
-    ("p" "Puase" qbittorrent-torrent-pause)
-    ("r" "Resume" qbittorrent-torrent-resume)
-    ("D" "Delete" qbittorrent-torrent-delete)]
-   ["Priority"
-    ("i" "Increase priority" qbittorrent-torrent-increase-priority)
-    ("d" "Decrease priority" qbittorrent-torrent-decrease-priority)
-    ("m" "Maximal  priority" qbittorrent-torrent-maximal-priority)]]
+   ["Add" ("a" "Add torrent" qbittorrent-dispatch-torrent-add)]
+   ["Info" ("i" "torrent Info" qbittorrent-dispatch-torrent-info)]
+   ["State" ("s" "State management" qbittorrent-dispatch-torrent-state)]
+   ["Priority" ("p" "Priority management" qbittorrent-dispatch-torrent-priority)]
+   ["Rename" ("r" "Rename actions" qbittorrent-dispatch-torrent-rename)]
+   ["Category" ("c" "Category management" qbittorrent-dispatch-torrent-category)]
+   ["Tag" ("t" "Tag management" qbittorrent-dispatch-torrent-tag)]]
+  ["Listing"
+   ("S" "Sorting" qbittorrent-torrent-list-sort)
+   ("F" "Filtering" qbittorrent-torrent-list-filter)]
   ["Transfer"
    ("I" "Info" qbittorrent-transfer-info)
    ("S" "Speed limits mode" qbittorrent-transfer-speed-limits-mode)]
   ["Log"
-   ("l" "Logs" qbittorrent-log-main)
-   ("p" "Peers" qbittorrent-log-peers)])
+   ("L" "Logs" qbittorrent-log-main)
+   ("P" "Peers" qbittorrent-log-peers)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent ()
+  "Torrent transient sub-menu for qbittorrent-mode"
+  ["Add" ("a" "Add torrent" qbittorrent-dispatch-torrent-add)]
+  ["Info" ("i" "torrent Info" qbittorrent-dispatch-torrent-info)]
+  ["State" ("s" "State management" qbittorrent-dispatch-torrent-state)]
+  ["Priority" ("p" "Priority management" qbittorrent-dispatch-torrent-priority)]
+  ["Rename" ("r" "Rename actions" qbittorrent-dispatch-torrent-rename)]
+  ["Category" ("c" "Category management" qbittorrent-dispatch-torrent-category)]
+  ["Tag" ("t" "Tag management" qbittorrent-dispatch-torrent-tag)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent-add ()
+  "Torrent transient sub-sub-menu for qbittorrent-mode"
+  [("f" "Add torrent with file" qbittorrent-torrent-add-file)
+   ("u" "Add torrent with URL"  qbittorrent-torrent-add-url)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent-info ()
+  "Torrent transient sub-sub-menu for qbittorrent-mode"
+  [("p" "Properties" qbittorrent-torrent-properties)
+   ("t" "Trackers" qbittorrent-torrent-trackers)
+   ("w" "Webseed" qbittorrent-torrent-webseeds)
+   ("f" "Files" qbittorrent-torrent-files)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent-state ()
+  "Torrent transient sub-sub-menu for qbittorrent-mode"
+  [("p" "Puase"  qbittorrent-torrent-pause)
+   ("r" "Resume" qbittorrent-torrent-resume)
+   ("d" "Delete" qbittorrent-torrent-delete)
+   ("s" "force Start" qbittorrent-torrent-force-start)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent-priority ()
+  "Torrent transient sub-sub-menu for qbittorrent-mode"
+  [("i" "Increase priority" qbittorrent-torrent-increase-priority)
+   ("d" "Decrease priority" qbittorrent-torrent-decrease-priority)
+   ("m" "Maximal  priority" qbittorrent-torrent-maximal-priority)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent-rename ()
+  "Torrent transient sub-sub-menu for qbittorrent-mode"
+  [("t" "Rename torrent" qbittorrent-torrent-rename)
+   ("f" "rename File" qbittorrent-torrent-rename-file)
+   ("d" "rename Folder" qbittorrent-torrent-rename-folder)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent-category ()
+  "Torrent transient sub-sub-menu for qbittorrent-mode"
+  [("s" "set Category" qbittorrent-torrent-set-category)
+   ("c" "Create category" qbittorrent-torrent-create-category)
+   ("e" "Edit category" qbittorrent-torrent-edit-category)
+   ("d" "Remove categories" qbittorrent-torrent-remove-categories)])
+
+(transient-define-prefix qbittorrent-dispatch-torrent-tag ()
+  "Torrent transient sub-sub-menu for qbittorrent-mode"
+  [("a" "add tags" qbittorrent-torrent-add-tags)
+   ("r" "remove tags" qbittorrent-torrent-remove-tags)
+   ("c" "create tags" qbittorrent-torrent-create-tags)
+   ("d" "delete tags" qbittorrent-torrent-delete-tags)])
 
 ;;;;; Transient functions
 
@@ -372,17 +421,8 @@
 
 ;;;;;; Torrent
 
-;;;;;;; Torrent Info
 
-(defun qbittorrent-torrent-list ()
-  "Show torrent info."
-  (interactive)
-  (let* ((session (qbittorrent--ensure-api-session))
-         (path "/api/v2/torrents/info"))
-    (qbittorrent-api session path
-                     :then (lambda (valist)
-                             (message "Torrent list:\n%S"
-                                      (string-join (mapcar (lambda (alist) (cdr (assoc 'name alist))) valist) "\n"))))))
+;;;;;;; Info
 
 (defun qbittorrent-torrent-properties (&optional torrent-hash)
   "Show torrent properties."
@@ -420,7 +460,7 @@
     (qbittorrent-api session path
                      :then (lambda (alist) (message "Torrent content files: %s" alist)))))
 
-;;;;;;; Operations
+;;;;;;; State
 
 (defun qbittorrent-torrent-pause (&optional torrent-hash)
   "Pause torrent."
@@ -445,6 +485,18 @@
                      :params `(("hashes" ,torrent-hash))
                      :as 'string
                      :then (lambda (response) (message "Resumed torrent %s" torrent-hash)))))
+
+(defun qbittorrent-torrent-force-start (&optional torrent-hash)
+  "Force start torrent."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/setForceStart"))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash) ("value" "true"))
+                     :as 'string
+                     :then (lambda (response) (message "Force started torrent %s" torrent-hash)))))
 
 (defun qbittorrent-torrent-delete (&optional torrent-hash)
   "Delete torrent."
@@ -495,6 +547,194 @@
                      :params `(("hashes" ,torrent-hash))
                      :as 'string ; response body
                      :then (lambda (response) (message "Maximal torrent priority for %s" torrent-hash)))))
+
+;;;;;;; Rename
+
+(defun qbittorrent-torrent-rename (&optional torrent-hash)
+  "Rename torrent TORRENT-HASH."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/rename")
+         (torrent-name (read-string "Torrent name: ")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash) ("name" ,torrent-name))
+                     :as 'string
+                     :then (lambda (response) (message "Renamed torrent to: %s" torrent-name)))))
+
+(defun qbittorrent-torrent-rename-file (&optional torrent-hash)
+  "Rename file."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/renameFile")
+         (old-name (read-string "Old name: "))
+         (new-name (read-string "New name: ")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash) ("oldPath" ,old-name) ("newPath" ,new-name))
+                     :as 'string
+                     :then (lambda (response) (message "Renamed file %s to %s" old-name new-name)))))
+
+(defun qbittorrent-torrent-rename-folder (&optional torrent-hash)
+  "Rename folder."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/renameFolder")
+         (old-name (read-string "Old name: "))
+         (new-name (read-string "New name: ")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash) ("oldPath" ,old-name) ("newPath" ,new-name))
+                     :as 'string
+                     :then (lambda (response) (message "Renamed file %s to %s" old-name new-name)))))
+
+;;;;;;; Category
+
+(defun qbittorrent-torrent-get-categories ()
+  "Get all categories."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/categories"))
+    (qbittorrent-api session path
+                     :as 'string
+                     ;; FIXME:
+                     :then (lambda (alist) (message alist)))))
+
+(defun qbittorrent-torrent-set-category (&optional torrent-hash)
+  "Set torrent category."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/setCategory")
+         (category (completing-read "Set torrent category: " (qbittorrent-torrent-get-categories))))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("hashes" ,torrent-hash) ("category" ,category))
+                     :as 'string
+                     :then (lambda (response) (message "Set torrent category: %s" category)))))
+
+(defun qbittorrent-torrent-create-category ()
+  "Add new category."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/createCategory")
+         (category (read-string "Create category: ")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("category" ,category))
+                     :as 'string
+                     :then (lambda (response) (message "Create category: %s" category)))))
+
+(defun qbittorrent-torrent-edit-category ()
+  "Edit category."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/editCategory")
+         (category (read-string "Edit category: ")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("category" ,category))
+                     :as 'string
+                     :then (lambda (response) (message "Edit category: %s" category)))))
+
+(defun qbittorrent-torrent-remove-categories ()
+  "Remove category."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/removeCategories")
+         (categories (completing-read-multiple "Remove categories: " (qbittorrent-torrent-get-categories))))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("categories" ,categories))
+                     :as 'string
+                     :then (lambda (response) (message "Edit category: %s" categories)))))
+
+;;;;;;; Tags
+
+(defun qbittorrent-torrent-get-tags ()
+  "Get all tags."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/tags"))
+    (qbittorrent-api session path
+                     :as 'string
+                     ;; FIXME:
+                     :then (lambda (alist) (message alist)))))
+
+(defun qbittorrent-torrent-add-tags (&optional torrent-hash)
+  "Add torrent tags."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/addTags")
+         (tags (string-join (completing-read-multiple "Add tags for torrent: " (qbittorrent-torrent-get-tags)) ",")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("tags" ,tags))
+                     :as 'string
+                     :then (lambda (response) (message "Torrent added tags: %s" tags)))))
+
+(defun qbittorrent-torrent-remove-tags (&optional torrent-hash)
+  "Remove torrent tags."
+  (interactive)
+  (let* ((torrent-hash (or torrent-hash (tabulated-list-get-id)))
+         (session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/removeTags")
+         (tags (string-join (completing-read-multiple "Remove tags for torrent: " (qbittorrent-torrent-get-tags)) ",")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("tags" ,tags))
+                     :as 'string
+                     :then (lambda (response) (message "Torrent removed tags: %s" tags)))))
+
+(defun qbittorrent-torrent-create-tags ()
+  "Create tags."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/createTags")
+         (tags (string-join (string-split (read-string "Create tags (separated with :): ") ":") ",")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("tags" ,tags))
+                     :as 'string
+                     :then (lambda (response) (message "Created tags: %s" tags)))))
+
+(defun qbittorrent-torrent-delete-tags ()
+  "Delete tags."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/deleteTags")
+         (tags (string-join (completing-read-multiple "Delete tags: " (qbittorrent-torrent-get-tags)) ",")))
+    (qbittorrent-api session path
+                     :method 'post
+                     :params `(("tags" ,tags))
+                     :as 'string
+                     :then (lambda (response) (message "Deleted tags: %s" tags)))))
+
+;;;;;; Sort & Filter
+
+(defun qbittorrent-torrent-list-torrents ()
+  "List all torrents info."
+  (interactive)
+  (let* ((session (qbittorrent--ensure-api-session))
+         (path "/api/v2/torrents/info"))
+    (qbittorrent-api session path
+                     :then (lambda (valist)
+                             (message "Torrent list:\n%S"
+                                      (string-join (mapcar (lambda (alist) (cdr (assoc 'name alist))) valist) "\n"))))))
+
+(defun qbittorrent-torrent-list-filter (&optional filter)
+  "Set filtering of torrents info list."
+  (interactive (list (completing-read "Filter: " '("all" "downloading" "seeding" "completed" "stopped" "active" "inactive" "running" "stalled" "stalled_uploading" "stalled_downloading" "errored"))))
+  (qbittorrent--torrents-info-path-setup :filter filter))
+
+(defun qbittorrent-torrent-list-sort (&optional sort)
+  "Set sorting of torrents info list."
+  (interactive (list (completing-read "Sort: " '("name" "size" "progress" "state" "ratio" "added_on" "completed_on" "download_speed" "upload_speed" "seeds" "leechers"))))
+  (qbittorrent--torrents-info-path-setup :sort sort))
 
 ;;;;;; Transfer
 
