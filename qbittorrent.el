@@ -421,6 +421,11 @@
 
 ;;;;;; Torrent
 
+;; torrents list a torrent response data structure:
+;; (let* ((session (qbittorrent--ensure-api-session))
+;;        (path "/api/v2/torrents/info"))
+;;   (qbittorrent-api session path
+;;                    :then (lambda (valist) (pp (aref valist 1)))))
 
 ;;;;;;; Info
 
