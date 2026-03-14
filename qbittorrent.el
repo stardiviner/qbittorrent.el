@@ -636,7 +636,8 @@
                       (when tag (format "&tag=%s" (url-encode-url tag)))
                       (when limit (format "&limit=%d" limit))
                       (when offset (format "&offset=%d" offset))
-                      (when reverse (format "&reverse=%s" (if (string-equal sort "added_on") "true" reverse))))))
+                      (when reverse (format "&reverse=%s" (if (string-equal sort "added_on") "true" reverse)))))
+  (message "[qBittorrent] torrents info listing API: %S" qbittorrent--torrents-info-path))
 
 (defun qbittorrent--refresh-torrents ()
   "Poll torrents info from server."
