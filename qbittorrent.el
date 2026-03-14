@@ -626,7 +626,7 @@
 (defvar-local qbittorrent--torrents-info-path "/api/v2/torrents/info?filter=all&sort=added_on&reverse=true"
   "Variable used in list torrents info path for transient sorting & filtering.")
 
-(cl-defun qbittorrent--torrents-info-path-setup (&key (filter "all") (sort "added_on") category tag limit offset reverse)
+(cl-defun qbittorrent--torrents-info-path-setup (&key (filter "all") (sort "added_on") category tag limit offset (reverse "false"))
   "Construct qBittorrent torrents info path API."
   (setq-local qbittorrent--torrents-info-path
               (concat "/api/v2/torrents/info?"
@@ -636,7 +636,7 @@
                       (when tag (format "&tag=%s" (url-encode-url tag)))
                       (when limit (format "&limit=%d" limit))
                       (when offset (format "&offset=%d" offset))
-                      (when reverse (format "&reverse=%s" reverse)))))
+                      (when reverse (format "&reverse=%s" (if (string-equal sort "added_on") "true" reverse))))))
 
 (defun qbittorrent--refresh-torrents ()
   "Poll torrents info from server."
