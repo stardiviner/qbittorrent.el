@@ -819,6 +819,7 @@
      ((string-prefix-p "stalled" state) "stalled")
      ((string-prefix-p "seeding\\|upload" state) "seeding")
      ((string-prefix-p "downloading\\|download" state) "downloading")
+     ((string-prefix-p "forced" state) "forced")
      ((string-prefix-p "error" state) "error")
      (t state))))
 
