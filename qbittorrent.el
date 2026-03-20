@@ -10,7 +10,7 @@
 ;; Version: 0.0.1
 ;; Keywords: files application
 ;; Homepage: https://github.com/merrickluo/qbittorrent
-;; Package-Requires: ((emacs "25.3") (transient "0.3"))
+;; Package-Requires: ((emacs "25.3") (transient "0.3") (svg-lib "0.3"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -23,6 +23,7 @@
 (require 'tabulated-list)
 (require 'transient)
 (require 'qbittorrent-api)
+(require 'svg-lib)
 
 ;;;; Variables
 
@@ -845,6 +846,11 @@
                                    ;; Size
                                    (propertize (file-size-human-readable (alist-get 'size torrent))
                                                'face '(:foreground "MediumPurple4"))
+                                   ;; Progress
+                                   (propertize " "
+                                               'display (svg-lib-progress-bar
+                                                         (alist-get 'progress torrent) nil
+                                                         :width 10 :stroke 2 :margin 1 :padding 1))
                                    ;; Done
                                    (propertize (format "%d%%" (* (alist-get 'progress torrent) 100))
                                                'face '(:foreground "yellow4"))
@@ -900,12 +906,13 @@
   (setq-local tabulated-list-format
               [("Name" 60 t :left-align t)
                ("Size" 8 >= :right-align t)
-               ("Done" 8 >= :right-align t)
-               ("ETA" 8 >= :right-align t)
+               ("Progress" 10 >= :left-align t)
+               ("Done" 4 >= :right-align t)
+               ("ETA" 4 >= :right-align t)
                ("Download" 9 nil :right-align t)
                ("Upload" 9 nil :right-align t)
                ("Ratio" 5 >= :right-align t)
-               ("Status" 12 t)
+               ("Status" 12 t :left-align t)
                ("Added on" 22 t :left-align t)])
   (setq tabulated-list-revert-hook #'qbittorrent--refresh-torrents)
   (tabulated-list-init-header))
